@@ -1,0 +1,27 @@
+#pragma once
+
+#include <wiiuse.h>
+
+#include <glm/vec3.hpp>
+
+namespace wiiviz {
+	struct Wiimote {
+	public:
+		Wiimote(wiimote_t *handle) : m_handle(handle) {}
+		void update();
+		bool isConnected() {
+			return m_handle != nullptr && WIIMOTE_IS_CONNECTED(m_handle);
+		}
+		glm::vec3 getAccel() {
+			// glm::vec3 has the exact same layout as gforce_t in wiiuse, so this trick can be used
+			return *reinterpret_cast<glm::vec3 *>(&m_handle->gforce);
+		}
+		wiimote_t * getNativeHandle() {
+			return m_handle;
+		}
+
+	private:
+		int m_id = -1;
+		wiimote_t *m_handle = nullptr;
+	};
+} // namespace wiiviz

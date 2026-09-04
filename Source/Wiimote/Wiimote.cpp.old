@@ -1,0 +1,4 @@
+#include "Wiimote.hpp"
+
+namespace wiiviz {
+} // namespace wiiviz
