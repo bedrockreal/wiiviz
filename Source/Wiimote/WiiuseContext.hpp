@@ -18,7 +18,7 @@ namespace wiiviz::Wiimote {
 		int connect();
 		bool poll();
 
-		int capacity() const { return m_capacity; }
+		int getCapacity() const { return m_capacity; }
 		int getConnectedCount() const { return m_connectedCount; }
 
 		wiimote_t** getHandles() { return m_wiimotes; }
@@ -35,11 +35,15 @@ namespace wiiviz::Wiimote {
 			return (index < 0 || index >= m_capacity) ? 0 : WIIMOTE_IS_CONNECTED(m_wiimotes[index]);
 		}
 
+		const timespec getLastPollTime() const {
+			return lastPollTime;
+		}
 
 	private:
 		wiimote_t **m_wiimotes = nullptr;
 		int m_capacity = 0;
 		int m_connectedCount = 0;
 		bool m_inited = false;
+		timespec lastPollTime;
 	};
 } // namespace wiiviz::Wiimote

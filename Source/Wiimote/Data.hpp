@@ -2,13 +2,14 @@
 
 #include <Common/ThreadSafeQueue.hpp>
 
+#include <ctime>
 #include <wiiuse.h>
 
 namespace wiiviz::Wiimote {
 	struct RawMotionSample {
-		// double time; // from glfwGetTime()
-		gforce_t gforce;
-		ang3f_t gyro;
+		timespec time;
+		const gforce_t *gforce = nullptr;
+		const ang3f_t *gyro = nullptr;
 	};
-	typedef wiiviz::ThreadSafeQueue<RawMotionSample> MotionData;
+	typedef wiiviz::ThreadSafeQueue<RawMotionSample> MotionSampleQueue;
 } // namespace wiiviz::Wiimote

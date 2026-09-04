@@ -1,4 +1,5 @@
 #include "WiiuseContext.hpp"
+#include <ctime>
 #include <wiiuse.h>
 
 using namespace wiiviz::Wiimote;
@@ -44,7 +45,6 @@ int WiiuseContext::connect() {
 
 	// temp: for every connected wiimote, activate accelerometer
 	for (int i = 0; i < m_capacity; ++i) if (WIIMOTE_IS_CONNECTED(m_wiimotes[i])) {
-		puts("activate accel");
 		wiiuse_motion_sensing(m_wiimotes[i], 1);
 	}
     return m_connectedCount;
@@ -54,5 +54,6 @@ bool WiiuseContext::poll() {
 	if (!m_wiimotes) {
 		return 0;
 	}
+	clock_gettime(CLOCK_MONOTONIC, &lastPollTime);
 	return wiiuse_poll(m_wiimotes, m_capacity) != 0;
 }

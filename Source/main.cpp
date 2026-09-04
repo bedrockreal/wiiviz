@@ -235,7 +235,11 @@ int main(int, char**)
 			} else {
 				assert(wiimoteSnapshot.latestSamples.size() == 1);
 				auto wiimoteAccel = wiimoteSnapshot.latestSamples[0].gforce;
-				sprintf(text, "accel x=%f y=%f z=%f\n", wiimoteAccel.x, wiimoteAccel.y, wiimoteAccel.z);
+				if (wiimoteAccel == nullptr) {
+					sprintf(text, "no data");
+				} else {
+					sprintf(text, "accel x=%f y=%f z=%f", wiimoteAccel->x, wiimoteAccel->y, wiimoteAccel->z);
+				}
 			}
             ImGui::Text(text);               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state

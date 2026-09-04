@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Data.hpp"
 #include "Snapshot.hpp"
 #include "Worker.hpp"
 
 #include <thread>
+#include <vector>
 
 namespace wiiviz::Wiimote {
 	class Service {
@@ -19,6 +21,7 @@ namespace wiiviz::Wiimote {
 
 	private:
 		SharedSnapshot m_sharedSnapshot;
+		std::vector<MotionSampleQueue*> m_sharedMotionDataStream;
 
 		Worker *m_worker;
 		std::thread m_workerThread;

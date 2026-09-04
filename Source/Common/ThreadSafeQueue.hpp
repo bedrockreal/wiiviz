@@ -11,10 +11,10 @@ namespace wiiviz {
 	// 2. wiimote snapshot: wiimote worker -> main
 	struct ThreadSafeQueue {
 	public:
-		void push(const T *cmd) {
+		void push(const T *elem) {
 			{
 				std::scoped_lock lock(m_mutex);
-				m_queue.push(*cmd);
+				m_queue.push(*elem);
 			}
 			m_cv.notify_one();
 		}

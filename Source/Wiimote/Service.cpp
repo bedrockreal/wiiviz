@@ -1,14 +1,16 @@
 #include "Service.hpp"
 #include "Snapshot.hpp"
 #include "Worker.hpp"
+#include <cassert>
 #include <thread>
 
 namespace wiiviz::Wiimote {
 	void Service::start(int capacity) {
-		// printf("&SharedSnapshot = %p\n", &m_sharedSnapshot);
+		assert(capacity >= 0);
 		// TODO: use std::promise or similar to catch the worker's return value.
 		m_sharedSnapshot.reset(capacity);
-		m_worker = new Worker(&m_sharedSnapshot);
+		m_sharedMotionDataStream.resize(capacity); // TODO: clear the queues
+		m_worker = new Worker(&m_sharedSnapshot, m_sharedMotionDataStream.data());
 		m_workerThread = std::thread(&Worker::run, m_worker, capacity);
 		m_workerThread.detach();
 	}

@@ -1,27 +1,31 @@
 #include "Worker.hpp"
+#include "Data.hpp"
 #include "Snapshot.hpp"
+#include "WiimoteManager.hpp"
 #include "WiiuseContext.hpp"
 
 #include <cassert>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <wiiuse.h>
 
 namespace wiiviz::Wiimote {
-	Worker::Worker(SharedSnapshot *sharedSnapshotPtr) {
+	Worker::Worker(
+			SharedSnapshot *sharedSnapshotPtr,
+			MotionSampleQueue **sharedMotionDataStream
+	) {
 		m_sharedSnapshotPtr = sharedSnapshotPtr;
+		m_sharedMotionDataStream = sharedMotionDataStream;
 	}
 	Worker::~Worker() {
-		if (m_context != nullptr) {
-			delete m_context;
-			m_context = nullptr;
+		if (m_wiimoteManager != nullptr) {
+			delete m_wiimoteManager;
+			m_wiimoteManager = nullptr;
 		}
 	}
 
 	void Worker::doInit(int capacity) {
-		m_context = new WiiuseContext(capacity);
-		assert(m_context != nullptr);
-		m_context->init();
+		m_wiimoteManager = new WiimoteManager();
+		assert(m_wiimoteManager != nullptr);
+		assert(m_wiimoteManager->init(capacity));
 
 		// init finish, write to snapshot
 		m_sharedSnapshotPtr->modify([](Snapshot *s) {
@@ -34,7 +38,8 @@ namespace wiiviz::Wiimote {
 		m_sharedSnapshotPtr->modify([](Snapshot *s) {
 			s->scanInProgress = 1;
 		});
-		m_context->find(1);
+
+		m_wiimoteManager->scan(1);
 
 		// scannign finished
 		m_sharedSnapshotPtr->modify([](Snapshot *s) {
@@ -48,7 +53,7 @@ namespace wiiviz::Wiimote {
 			s->connectInProgress = 1;
 		});
 
-		int connectedCount = m_context->connect();
+		int connectedCount = m_wiimoteManager->connect();
 
 		// done connecting: notify and set connectedCount
 		m_sharedSnapshotPtr->modify([connectedCount](Snapshot *s) {
@@ -57,24 +62,14 @@ namespace wiiviz::Wiimote {
 		});
 	}
 
-	void Worker::doPublishSnapshot() {
-		m_sharedSnapshotPtr->modify([this](Snapshot *s) {
-				// printf("doPublishSnapshot: s = %p\n", s);
-				s->lastUpdatedTime = glfwGetTime();
-				for (int i = 0; i < s->latestSamples.size(); ++i) {
-					if (m_context->isWiimoteConnected(i)) {
-						auto curWm = m_context->getHandleAt(i);
-						// assert(WIIUSE_USING_ACC(curWm));
-						// printf("curWm: accel x=%f y=%f z=%f\n", curWm->gforce.x, curWm->gforce.y, curWm->gforce.z);
-						memcpy(&s->latestSamples[i].gforce, &curWm->gforce, sizeof(gforce_t));
-						s->latestSamples[i].gyro = curWm->exp.mp.angle_rate_gyro;
-					}
-				}
-			});
+	void Worker::doPublishUpdate(int updatedSlot, const RawMotionSample *updatedSample) {
+		m_sharedSnapshotPtr->modify([&updatedSlot, &updatedSample](Snapshot *s) {
+				s->lastUpdatedTime = updatedSample->time;
+				s->latestSamples[updatedSlot] = *updatedSample;
+				});
 	}
 
 	bool Worker::run(int capacity) {
-		printf("sharedSnapshotPtr = %p\n", m_sharedSnapshotPtr);
 		doInit(capacity);
 		doScan();
 		doConnect();
@@ -86,11 +81,17 @@ namespace wiiviz::Wiimote {
 				m_scanRequested.store(0);
 			}
 
-			if (m_context->poll()) {
-				doPublishSnapshot();
-				auto s = m_sharedSnapshotPtr->read();
-				printf("snapshot: accel x=%f y=%f z=%f\n", s.latestSamples[0].gforce.x, s.latestSamples[0].gforce.y, s.latestSamples[0].gforce.z);
-			}
+			// TODO: publish to queue, if we're recording
+			m_wiimoteManager->pollAndUpdate([this](
+						int updatedSlot,
+						const RawMotionSample *updatedSample
+					) {
+						// puts("m_wiimoteManager->pollAndUpdate callback");
+						this->m_sharedSnapshotPtr->modify([&updatedSlot, &updatedSample](Snapshot *s) {
+								s->lastUpdatedTime = updatedSample->time;
+								s->latestSamples[updatedSlot] = *updatedSample;
+								});
+					});
 		}
 		
 		// cleanup done when deleting m_context on worker destruction

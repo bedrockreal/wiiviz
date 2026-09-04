@@ -3,6 +3,7 @@
 #include "Data.hpp"
 
 #include <cstring>
+#include <ctime>
 #include <functional>
 #include <mutex>
 #include <vector>
@@ -15,7 +16,7 @@ namespace wiiviz::Wiimote {
 		bool shutdownRequested;
 		int connectedCount;
 
-		double lastUpdatedTime;
+		timespec lastUpdatedTime;
 		std::vector<RawMotionSample> latestSamples;
 	};
 
