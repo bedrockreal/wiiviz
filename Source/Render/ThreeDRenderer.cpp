@@ -37,11 +37,9 @@ void ThreeDRenderer::renderScene() {
 
 void ThreeDRenderer::useShader(Shader *shader) {
 	activeShader = shader;
-	glUseProgram(shader->ID);
+	shader->bind();
 
-	// for testing, assume model == I4
-	glm::mat4 model			= glm::mat4(1.0f);
-	GL_BIND_SHADER_UNIFORM(shader->ID, model, Matrix4fv);
-	GL_BIND_SHADER_UNIFORM(shader->ID, view, Matrix4fv);
-	GL_BIND_SHADER_UNIFORM(shader->ID, projection, Matrix4fv);
+	shader->setMat4("model", glm::mat4(1.0f));
+	shader->setMat4("view", view);
+	shader->setMat4("projection", projection);
 }

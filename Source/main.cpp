@@ -96,7 +96,8 @@ int main(int, char**)
 
     // build and compile our shader program
     // ------------------------------------
-	wiiviz::Shader shader("../assets/shaders/main.vs", "../assets/shaders/main.fs");
+	wiiviz::Shader shader;
+	shader.loadFromFile("../assets/shaders/main.vs", "../assets/shaders/main.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------

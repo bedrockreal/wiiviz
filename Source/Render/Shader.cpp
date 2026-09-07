@@ -1,5 +1,6 @@
 #include "Shader.hpp"
 
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <stdlib.h>
@@ -35,37 +36,39 @@ static char *loadTextFromFile(const char *filename) {
 	return text;
 }
 
-void Shader::load(const char *vsFile, const char *fsFile) {
-	if (vsFile == nullptr || fsFile == nullptr) {
-		fprintf(stderr, "Error: You must specify a shader file!\n");
-		return;
-	}
-	vsCode = loadTextFromFile(vsFile);
-	fsCode = loadTextFromFile(fsFile);
-}
+void Shader::loadFromFile(const char *vsFile, const char *fsFile) {
+	assert(vsFile != nullptr && fsFile != nullptr);
+	char *vsCode = loadTextFromFile(vsFile);
+	char *fsCode = loadTextFromFile(fsFile);
 
-void Shader::compile() {
-        // vertex shader
-	vsHandle = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vsHandle, 1, &vsCode, NULL);
-	glCompileShader(vsHandle);
-	checkCompileErrors(vsHandle, "VERTEX");
-        // fragment Shader
-	fsHandle = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fsHandle, 1, &fsCode, NULL);
-	glCompileShader(fsHandle);
-	checkCompileErrors(fsHandle, "FRAGMENT");
-}
+	GLuint vsHandle = compile(vsCode, GL_VERTEX_SHADER, "VERTEX");
+	GLuint fsHandle = compile(fsCode, GL_FRAGMENT_SHADER, "FRAGMENT");
 
-void Shader::createProgram() {
-	ID = glCreateProgram();
-	glAttachShader(ID, vsHandle);
-	glAttachShader(ID, fsHandle);
-	glLinkProgram(ID);
-	checkCompileErrors(ID, "PROGRAM");
+	createProgram(vsHandle, fsHandle);
+
 	// delete the shaders as they're linked into our program now and no longer necessary
 	glDeleteShader(vsHandle);
 	glDeleteShader(fsHandle);
+
+	// cleanup
+	free(vsCode);
+	free(fsCode);
+}
+
+GLuint Shader::compile(const char *code, GLenum shaderType, const char *strType) {
+	GLuint handle = glCreateShader(shaderType);
+	glShaderSource(handle, 1, &code, NULL);
+	glCompileShader(handle);
+	checkCompileErrors(handle, strType);
+	return handle;
+}
+
+void Shader::createProgram(GLuint vsHandle, GLuint fsHandle) {
+	m_program = glCreateProgram();
+	glAttachShader(m_program, vsHandle);
+	glAttachShader(m_program, fsHandle);
+	glLinkProgram(m_program);
+	checkCompileErrors(m_program, "PROGRAM");
 }
 
 void Shader::checkCompileErrors(GLuint shader, const char *type)
