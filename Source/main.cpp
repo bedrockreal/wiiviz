@@ -14,6 +14,7 @@
 #include "Core/Window.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Renderer.hpp"
+#include "Render/SceneView.hpp"
 #include "Render/Shader.hpp"
 #include "Wiimote/Service.hpp"
 
@@ -69,14 +70,13 @@ static void glConfigure() {
 }
 
 wiiviz::Renderer renderer;
+wiiviz::SceneView scene;
 
 static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	renderer.resize(width, height);
 }
-
-wiiviz::Camera camera;
 
 // Main code
 int main(int, char**)
@@ -280,24 +280,24 @@ int main(int, char**)
         ImGui::Render();
 
 
-		// clears the screen. TODO: move it to window.hpp
-		glClearColor(
+		// clears the screen.
+		renderer.setClearColor(
 				clear_color.x * clear_color.w,
 				clear_color.y * clear_color.w,
 				clear_color.z * clear_color.w,
 				clear_color.w);
 
 		renderer.beginFrame();
+		renderer.renderScene(&scene);
 
 		// activate shader and bind uniforms
-		// renderer.useShader(&shader);
 
 		float aspectRatio = (float)window.framebufferWidth() / (float)window.framebufferHeight();
 
 		shader.bind();
 		shader.setMat4("model", glm::mat4(1.0f));
-		shader.setMat4("view", camera.getViewMatrix());
-		shader.setMat4("projection", camera.getProjectionMatrix(aspectRatio));
+		shader.setMat4("view", scene.camera.getViewMatrix());
+		shader.setMat4("projection", scene.camera.getProjectionMatrix(aspectRatio));
 
 		/* working example
 		 * const float radius = 10.0f;

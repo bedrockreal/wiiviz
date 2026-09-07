@@ -1,9 +1,9 @@
 #include "Mouse.hpp"
 
-#include <Render/Camera.hpp>
+#include <Render/SceneView.hpp>
 #include <GLFW/glfw3.h>
 
-extern wiiviz::Camera camera;
+extern wiiviz::SceneView scene;
 
 namespace wiiviz::Mouse {
 	void cursorCallback(GLFWwindow *window, double xpos, double ypos) {
@@ -21,14 +21,14 @@ namespace wiiviz::Mouse {
 		 * shift + MMB -> pan
 		 */
 		if (cursorAction == ORBIT) {
-			camera.orbit(dx, dy);
+			scene.camera.orbit(dx, dy);
 		} else if (cursorAction == PAN) {
-			camera.pan(dx, dy);
+			scene.camera.pan(dx, dy);
 		}
 	}
 
 	void scrollCallback(GLFWwindow *window, double dx, double dy) {
-		camera.zoom(dy);
+		scene.camera.zoom(dy);
 	}
 
 	void buttonCallback(GLFWwindow* window, int button, int action, int mods) {

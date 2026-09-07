@@ -14,7 +14,14 @@ void Renderer::beginFrame() {
 	clear();
 }
 
-void Renderer::renderScene() {
+void Renderer::renderScene(const SceneView *scene) {
+	RenderContext ctx;
+	ctx.view = scene->camera.getViewMatrix();
+	ctx.proj = scene->camera.getProjectionMatrix((float)m_viewportWidth / (float)m_viewportHeight);
+	ctx.viewProj = ctx.proj * ctx.view;
+	ctx.cameraPosition = scene->camera.getPosition();
+
+	m_gridRenderer.render(&ctx);
 }
 
 void Renderer::resize(int framebufferWidth, int framebufferHeight) {

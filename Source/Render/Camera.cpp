@@ -13,9 +13,9 @@ Camera::Camera() {
 }
 
 void Camera::reset() {
-	pos = glm::vec3(10, 0, 10);
-	direction = glm::normalize(-pos); // set target := (0, 0, 0)
-	targetDistance = glm::length(pos);
+	m_position = glm::vec3(10, 0, 10);
+	direction = glm::normalize(-m_position); // set target := (0, 0, 0)
+	targetDistance = glm::length(m_position);
 
 	fov = glm::radians(45.f);
 	nearPlane = 0.01f;
@@ -25,7 +25,7 @@ void Camera::reset() {
 void Camera::pan(const float mouse_dx, const float mouse_dy) {
 	// printf("pan dx=%.3f dy=%.3f\n", mouse_dx, mouse_dy);
 	glm::vec3 right = glm::normalize(glm::cross(up, direction));
-	pos += (right * mouse_dx + up * mouse_dy) * panSpeed;
+	m_position += (right * mouse_dx + up * mouse_dy) * panSpeed;
 	// printPos();
 }
 
@@ -46,6 +46,6 @@ void Camera::orbit(const float mouse_dx, const float mouse_dy) {
 	directionNeg.z = std::sinf(pitch);
 
 	direction = glm::normalize(-directionNeg);
-	pos = target - direction * targetDistance;
+	m_position = target - direction * targetDistance;
 	// printPos();
 }

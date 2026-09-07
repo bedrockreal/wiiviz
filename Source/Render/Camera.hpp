@@ -16,17 +16,18 @@ namespace wiiviz {
 
 		// make zoom, getTarget and getView inline
 		void zoom(const float offset) {
-			pos += direction * offset * zoomSpeed;
+			m_position += direction * offset * zoomSpeed;
 		}
 		const glm::vec3 getTarget() const {
-			return pos + direction * targetDistance;
+			return m_position + direction * targetDistance;
 		}
 		const glm::mat4 getViewMatrix() const {
-			return glm::lookAt(pos, getTarget(), up);
+			return glm::lookAt(m_position, getTarget(), up);
 		}
 		const glm::mat4 getProjectionMatrix(const float aspectRatio) const {
 			return glm::perspective(fov, aspectRatio, nearPlane, farPlane);
 		}
+		const glm::vec3 getPosition() const { return m_position; }
 		void reset();
 
 	private:
@@ -47,11 +48,11 @@ namespace wiiviz {
 		float nearPlane;
 		float farPlane;
 
-		glm::vec3 pos;
+		glm::vec3 m_position;
 		glm::vec3 direction;
 
 		void printPos() {
-			printf("%.3f %.3f %.3f\n", pos.x, pos.y, pos.z);
+			printf("%.3f %.3f %.3f\n", m_position.x, m_position.y, m_position.z);
 		}
 	};
 } // namespace wiiviz
