@@ -13,7 +13,7 @@
 #include "Core/Input/Mouse.hpp"
 #include "Core/Window.hpp"
 #include "Render/Camera.hpp"
-#include "Render/ThreeDRenderer.hpp"
+#include "Render/Renderer.hpp"
 #include "Render/Shader.hpp"
 #include "Wiimote/Service.hpp"
 
@@ -67,11 +67,14 @@ static void glConfigure() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #endif
 }
-	static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
-		// make sure the viewport matches the new window dimensions; note that width and 
-		// height will be significantly larger than specified on retina displays.
-		glViewport(0, 0, width, height);
-	}
+
+wiiviz::Renderer renderer;
+
+static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+	// make sure the viewport matches the new window dimensions; note that width and 
+	// height will be significantly larger than specified on retina displays.
+	renderer.resize(width, height);
+}
 
 wiiviz::Camera camera;
 
@@ -102,8 +105,7 @@ int main(int, char**)
 	wiiviz::Mouse::bindCallbacks(window.nativeHandle());
 
 	// setup renderer
-	wiiviz::ThreeDRenderer renderer;
-	renderer.init(window.nativeHandle());
+	renderer.init();
 
     // build and compile our shader program
     // ------------------------------------
@@ -277,7 +279,6 @@ int main(int, char**)
         // Rendering
         ImGui::Render();
 
-		renderer.beginFrame();
 
 		// clears the screen. TODO: move it to window.hpp
 		glClearColor(
@@ -286,16 +287,17 @@ int main(int, char**)
 				clear_color.z * clear_color.w,
 				clear_color.w);
 
-		glClear(GL_COLOR_BUFFER_BIT);
-
+		renderer.beginFrame();
 
 		// activate shader and bind uniforms
-		renderer.useShader(&shader);
+		// renderer.useShader(&shader);
 
-		// shader.bind();
-		// shader.setMat4("model", glm::mat4(1.0f));
-		// shader.setMat4("view", camera.getViewMatrix());
-		// shader.setMat4("projection", camera.getProjectionMatrix()
+		float aspectRatio = (float)window.framebufferWidth() / (float)window.framebufferHeight();
+
+		shader.bind();
+		shader.setMat4("model", glm::mat4(1.0f));
+		shader.setMat4("view", camera.getViewMatrix());
+		shader.setMat4("projection", camera.getProjectionMatrix(aspectRatio));
 
 		/* working example
 		 * const float radius = 10.0f;
