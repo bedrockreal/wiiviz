@@ -1,4 +1,5 @@
 #include "ThreeDRenderer.hpp"
+#include "Camera.hpp"
 #include "Shader.hpp"
 
 #include <glm/ext/matrix_clip_space.hpp>
@@ -7,12 +8,7 @@
 
 using namespace wiiviz;
 
-#define GL_BIND_SHADER_UNIFORM(progID, varName, varType)	\
-	glUniform##varType(								\
-			glGetUniformLocation(progID, #varName),	\
-			1,										\
-			GL_FALSE,								\
-			glm::value_ptr(varName))
+extern Camera camera;
 
 void ThreeDRenderer::beginFrame() {
 	// clear the screen: should be done by window class
@@ -24,12 +20,10 @@ void ThreeDRenderer::beginFrame() {
 
 	// setup MVP
 	// note: the model matrix is model-specific, so it's not stored here
-	view		= camera.getView();
-	projection	= glm::perspective(
-			projectionParams.fov,
-			(float)(display_w) / (float)(display_h),
-			projectionParams.nearZ,
-			projectionParams.farZ);
+	view            = camera.getViewMatrix();
+	projection		= camera.getProjectionMatrix(
+                (float)(display_w) / (float)(display_h)
+			);
 }
 
 void ThreeDRenderer::renderScene() {

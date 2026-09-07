@@ -24,23 +24,8 @@ namespace wiiviz {
 
 		void renderScene() override;
 		void useShader(Shader *shader) override;
-		Camera * getCamera() {
-			return &camera;
-		}
 	private:
-		Camera camera;
-
 		glm::mat4 view;
 		glm::mat4 projection;
-
-		constexpr static struct {
-			float fov;
-			float nearZ;
-			float farZ;
-		} projectionParams = {
-			.fov = glm::radians(45.f),
-			.nearZ = 0.1f,
-			.farZ = 100.f,
-		};
 	};
 } // namespace wiiviz

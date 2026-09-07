@@ -1,15 +1,15 @@
 #pragma once
 
 #include <cstdio>
-#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 #include <glm/trigonometric.hpp>
 
 namespace wiiviz {
 	struct Camera {
-	public:
+		public:
 		Camera();
 		void pan(const float dx, const float dy);
 		void orbit(const float dx, const float dy);
@@ -27,9 +27,14 @@ namespace wiiviz {
 		const glm::mat4 getProjectionMatrix(const float aspectRatio) const {
 			return glm::perspective(fov, aspectRatio, nearPlane, farPlane);
 		}
+		glm::vec3 getPosition() const { return pos; }
 		void reset();
 
-	private:
+		void printPos() const {
+			printf("%.3f %.3f %.3f\n", pos.x, pos.y, pos.z);
+		}
+
+		private:
 		constexpr static glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
 		float targetDistance;
 
@@ -49,9 +54,5 @@ namespace wiiviz {
 
 		glm::vec3 pos;
 		glm::vec3 direction;
-
-		void printPos() {
-			printf("%.3f %.3f %.3f\n", pos.x, pos.y, pos.z);
-		}
 	};
 } // namespace wiiviz

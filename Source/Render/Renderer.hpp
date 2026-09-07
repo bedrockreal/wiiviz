@@ -17,9 +17,7 @@ namespace wiiviz {
 		virtual void beginFrame() = 0;
 
 		virtual void renderScene() = 0;
-		void endFrame() {
-			glfwSwapBuffers(window);
-		}
+		void endFrame() {}
 	protected:
 		GLFWwindow *window;
 		Shader *activeShader;

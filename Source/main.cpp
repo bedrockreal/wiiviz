@@ -12,10 +12,12 @@
 
 #include "Core/Input/Mouse.hpp"
 #include "Core/Window.hpp"
+#include "Render/Camera.hpp"
 #include "Render/ThreeDRenderer.hpp"
 #include "Render/Shader.hpp"
 #include "Wiimote/Service.hpp"
 
+#include <glm/ext/matrix_float4x4.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -57,10 +59,21 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-// namespace wiiviz {
-// } // namespace wiiviz
+static void glConfigure() {
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef	__APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+#endif
+}
+	static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+		// make sure the viewport matches the new window dimensions; note that width and 
+		// height will be significantly larger than specified on retina displays.
+		glViewport(0, 0, width, height);
+	}
 
-wiiviz::ThreeDRenderer renderer;
+wiiviz::Camera camera;
 
 // Main code
 int main(int, char**)
@@ -69,15 +82,12 @@ int main(int, char**)
     if (!glfwInit())
         return 1;
 
-	wiiviz::Window::configure();
+	glConfigure();
 
-    // Create window with graphics context
-    float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow((int)(wiiviz::Window::SCR_WIDTH * main_scale), (int)(wiiviz::Window::SCR_HEIGHT * main_scale), "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
-    if (window == nullptr)
-        return 1;
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+	wiiviz::Window window;
+	window.create(800, 600, "test");
+	window.activate();
+	window.setVSync(true);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -88,11 +98,12 @@ int main(int, char**)
     }
 
 	// setup callbacks
-	wiiviz::Window::bindCallbacks(window);
-	wiiviz::Mouse::bindCallbacks(window);
+	glfwSetFramebufferSizeCallback(window.nativeHandle(), &framebufferSizeCallback);
+	wiiviz::Mouse::bindCallbacks(window.nativeHandle());
 
 	// setup renderer
-	renderer.init(window);
+	wiiviz::ThreeDRenderer renderer;
+	renderer.init(window.nativeHandle());
 
     // build and compile our shader program
     // ------------------------------------
@@ -150,15 +161,10 @@ int main(int, char**)
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
-    // Setup scaling
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
-
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(window.nativeHandle(), true);
 #ifdef __EMSCRIPTEN__
-    ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
+    ImGui_ImplGlfw_InstallEmscriptenCallbacks(window.nativeHandle(), "#canvas");
 #endif
 	const char* glsl_version = nullptr;
     ImGui_ImplOpenGL3_Init(glsl_version);
@@ -198,7 +204,7 @@ int main(int, char**)
     io.IniFilename = nullptr;
     EMSCRIPTEN_MAINLOOP_BEGIN
 #else
-    while (!glfwWindowShouldClose(window))
+    while (!window.shouldClose())
 #endif
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -207,7 +213,7 @@ int main(int, char**)
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
-        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
+        if (glfwGetWindowAttrib(window.nativeHandle(), GLFW_ICONIFIED) != 0)
         {
             ImGui_ImplGlfw_Sleep(10);
             continue;
@@ -274,14 +280,22 @@ int main(int, char**)
 		renderer.beginFrame();
 
 		// clears the screen. TODO: move it to window.hpp
-		wiiviz::Window::clearScreen(
+		glClearColor(
 				clear_color.x * clear_color.w,
 				clear_color.y * clear_color.w,
 				clear_color.z * clear_color.w,
 				clear_color.w);
 
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
 		// activate shader and bind uniforms
 		renderer.useShader(&shader);
+
+		// shader.bind();
+		// shader.setMat4("model", glm::mat4(1.0f));
+		// shader.setMat4("view", camera.getViewMatrix());
+		// shader.setMat4("projection", camera.getProjectionMatrix()
 
 		/* working example
 		 * const float radius = 10.0f;
@@ -299,6 +313,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		renderer.endFrame();
+		window.swapBuffers();
     }
 #ifdef __EMSCRIPTEN__
     EMSCRIPTEN_MAINLOOP_END;
@@ -311,7 +326,7 @@ int main(int, char**)
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+	window.destroy();
     glfwTerminate();
 
     return 0;

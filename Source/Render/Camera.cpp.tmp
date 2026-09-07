@@ -16,10 +16,6 @@ void Camera::reset() {
 	pos = glm::vec3(10, 0, 10);
 	direction = glm::normalize(-pos); // set target := (0, 0, 0)
 	targetDistance = glm::length(pos);
-
-	fov = glm::radians(45.f);
-	nearPlane = 0.01f;
-	farPlane = 100.f;
 }
 
 void Camera::pan(const float mouse_dx, const float mouse_dy) {

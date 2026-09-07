@@ -3,31 +3,65 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace wiiviz::Window {
-	constexpr unsigned int SCR_WIDTH = 800;
-	constexpr unsigned int SCR_HEIGHT = 600;
+#include <glm/ext/vector_double2.hpp>
 
-	static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
-		// make sure the viewport matches the new window dimensions; note that width and 
-		// height will be significantly larger than specified on retina displays.
-		glViewport(0, 0, width, height);
-	}
+static int modifiersPressed;
 
-	void configure() {
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef	__APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-#endif
-	}
+namespace wiiviz {
+	class Window {
+	public:
+		bool create(int width, int height, const char* title) {
+			m_handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
+			return m_handle != nullptr;
+		}
 
-	void bindCallbacks(GLFWwindow *window) {
-		glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-	}
+		void activate() { glfwMakeContextCurrent(m_handle); }
+		void destroy() { glfwDestroyWindow(m_handle); }
 
-	void clearScreen(const float r, const float g, const float b, const float a) {
-		glClearColor(r, g, b, a);
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-} // namespace wiiviz::Window
+		bool shouldClose() const {
+			return glfwWindowShouldClose(m_handle);
+		}
+		void pollEvents() { glfwPollEvents(); }
+		void swapBuffers() { glfwSwapBuffers(m_handle); }
+
+		void setVSync(bool enabled) {
+			glfwSwapInterval(enabled);
+		}
+
+		// void bindCallbacks() {
+		// 	glfwSetKeyCallback(m_handle, &Window::keyCallback);
+		// }
+
+		int width() const;
+		int height() const;
+		int framebufferWidth() const {
+			int fbWidth, fbHeight;
+			glfwGetFramebufferSize(m_handle, &fbWidth, &fbHeight);
+			return fbWidth;
+		}
+		int framebufferHeight() const {
+			int fbWidth, fbHeight;
+			glfwGetFramebufferSize(m_handle, &fbWidth, &fbHeight);
+			return fbHeight;
+		}
+
+		bool isKeyJustPressed(int key) const {
+			return glfwGetKey(m_handle, key) == GLFW_PRESS;
+		}
+
+		glm::dvec2 getCursorPos() {
+			glfwGetCursorPos(m_handle, &m_cursorPos.x, &m_cursorPos.y);
+			return m_cursorPos;
+		}
+
+		GLFWwindow* nativeHandle() { return m_handle; }
+
+	private:
+		GLFWwindow* m_handle = nullptr;
+
+		glm::dvec2 m_cursorPos;
+		int m_modifiers;
+
+		void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) { m_modifiers = mods; }
+	};
+} // namespace wiiviz
