@@ -236,10 +236,10 @@ int main(int, char**)
 			} else {
 				assert(wiimoteSnapshot.latestSamples.size() == 1);
 				auto wiimoteAccel = wiimoteSnapshot.latestSamples[0].gforce;
-				if (wiimoteAccel == nullptr) {
+				if (!wiimoteSnapshot.inited) {
 					sprintf(text, "no data");
 				} else {
-					sprintf(text, "accel x=%f y=%f z=%f", wiimoteAccel->x, wiimoteAccel->y, wiimoteAccel->z);
+					sprintf(text, "accel x=%f y=%f z=%f", wiimoteAccel.x, wiimoteAccel.y, wiimoteAccel.z);
 				}
 			}
             ImGui::Text(text);               // Display some text (you can use a format strings too)

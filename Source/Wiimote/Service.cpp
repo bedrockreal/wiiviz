@@ -11,6 +11,7 @@ namespace wiiviz::Wiimote {
 		m_sharedSnapshot.reset(capacity);
 		m_sharedMotionDataStream.resize(capacity); // TODO: clear the queues
 		m_worker = new Worker(&m_sharedSnapshot, m_sharedMotionDataStream.data());
+		assert(m_worker != nullptr);
 		m_workerThread = std::thread(&Worker::run, m_worker, capacity);
 		m_workerThread.detach();
 	}
