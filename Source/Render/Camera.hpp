@@ -11,12 +11,12 @@ namespace wiiviz {
 	struct Camera {
 	public:
 		Camera();
-		void pan(const float dx, const float dy);
-		void orbit(const float dx, const float dy);
+		void pan(const glm::vec2 offset);
+		void orbit(const glm::vec2 offset);
 
 		// make zoom, getTarget and getView inline
 		void zoom(const float offset) {
-			m_position += direction * offset * zoomSpeed;
+			// m_position += direction * offset * zoomSpeed;
 		}
 		const glm::vec3 getTarget() const {
 			return m_position + direction * targetDistance;
@@ -34,9 +34,9 @@ namespace wiiviz {
 		constexpr static glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
 		float targetDistance;
 
-		constexpr static float panSpeed = 0.01;
-		constexpr static float orbitSpeed = 0.01;
-		constexpr static float zoomSpeed = 0.5;
+		// constexpr static float panSpeed = 0.01;
+		// constexpr static float orbitSpeed = 0.01;
+		// constexpr static float zoomSpeed = 0.5;
 		constexpr static float maxPitch = glm::radians(89.f);
 
 		// yaw and pitch are in radians.

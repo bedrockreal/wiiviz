@@ -67,8 +67,8 @@ namespace wiiviz {
 	void Window::scrollCallback(double xoffset, double yoffset) {
 		InputEvent event;
 		event.type = EventType::MouseScroll;
-		event.mouseScroll.xoffset = xoffset;
-		event.mouseScroll.yoffset = yoffset;
+		event.mouseScroll.offset.x = xoffset;
+		event.mouseScroll.offset.y = yoffset;
 		event.modifiers = m_modifiersDown;
 		pushEvent(event);
 	}

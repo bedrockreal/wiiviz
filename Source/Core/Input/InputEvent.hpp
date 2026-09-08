@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/ext/vector_double2.hpp>
 namespace wiiviz {
 	struct MouseButtonEvent {
 		int button;
@@ -10,8 +11,7 @@ namespace wiiviz {
 		int action;
 	};
 	struct MouseScrollEvent {
-		double xoffset;
-		double yoffset;
+		glm::dvec2 offset;
 	};
 
 	enum EventType {

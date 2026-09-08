@@ -29,7 +29,11 @@ namespace wiiviz {
 		bool shouldClose() const {
 			return glfwWindowShouldClose(m_handle);
 		}
-		void pollEvents() { glfwPollEvents(); }
+		void pollEvents() {
+			// before polling glfw, clear the event queue
+			while (!eventQueue.empty()) eventQueue.pop();
+			glfwPollEvents();
+		}
 		void swapBuffers() { glfwSwapBuffers(m_handle); }
 
 		void setVSync(bool enabled) {
@@ -51,7 +55,7 @@ namespace wiiviz {
 		}
 
 		bool isModifierDown(int mod) const {
-			return (m_modifiersDown & (1 << mod));
+			return m_modifiersDown & mod;
 		}
 
 		glm::dvec2 getCursorPos() {

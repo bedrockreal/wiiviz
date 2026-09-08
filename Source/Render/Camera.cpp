@@ -1,7 +1,9 @@
 #include "Camera.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <glm/common.hpp>
+#include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/geometric.hpp>
 #include <glm/trigonometric.hpp>
@@ -22,22 +24,24 @@ void Camera::reset() {
 	farPlane = 100.f;
 }
 
-void Camera::pan(const float mouse_dx, const float mouse_dy) {
+void Camera::pan(const glm::vec2 offset) {
 	// printf("pan dx=%.3f dy=%.3f\n", mouse_dx, mouse_dy);
 	glm::vec3 right = glm::normalize(glm::cross(up, direction));
-	m_position += (right * mouse_dx + up * mouse_dy) * panSpeed;
+	m_position += (right * offset.x + up * offset.y);
 	// printPos();
 }
 
-void Camera::orbit(const float mouse_dx, const float mouse_dy) {
+void Camera::orbit(const glm::vec2 offset) {
 	// printf("orbit dx=%.3f dy=%.3f\n", mouse_dx, mouse_dy);
 	const glm::vec3 target = getTarget();
 	glm::vec3 directionNeg = glm::normalize(-direction);
 	float pitch = std::asinf((directionNeg.z));
 	float yaw = std::atan2(directionNeg.y, directionNeg.x);
 
-	yaw -= mouse_dx * orbitSpeed;
-	pitch = glm::max(-maxPitch, glm::min(pitch + mouse_dy * orbitSpeed, maxPitch));
+	yaw -= offset.x;
+	// yaw -= offset.x * orbitSpeed;
+	pitch = std::clamp(pitch + offset.y, -maxPitch, maxPitch);
+	// pitch = glm::max(-maxPitch, glm::min(pitch + offset.y * orbitSpeed, maxPitch));
 
 	// printf("yaw=%.3f pitch=%.3f\n", yaw, pitch);
 

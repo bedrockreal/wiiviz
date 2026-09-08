@@ -1,7 +1,9 @@
 #pragma once
 
 #include "AppState.hpp"
+#include <Core/Input/InputState.hpp>
 #include <Core/Window.hpp>
+#include <Render/CameraController.hpp>
 #include <Render/Renderer.hpp>
 #include <Render/SceneView.hpp>
 #include <UI/UIManager.hpp>
@@ -24,8 +26,12 @@ namespace wiiviz {
 		Wiimote::Service m_wiimoteService;
 
 		AppState m_appState;
+		InputState m_inputState;
+
+		CameraController m_cameraController;
 
 		void update();
+		void updateInputState();
 		void buildSceneView(const AppState *appState);
 	};
 }
