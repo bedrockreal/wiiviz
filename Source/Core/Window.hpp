@@ -1,10 +1,13 @@
 #pragma once
 
-#include <cstdio>
+#include "Input/InputEvent.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/ext/vector_double2.hpp>
+#include <glm/ext/vector_int2.hpp>
+#include <queue>
 
 static int modifiersPressed;
 
@@ -37,19 +40,18 @@ namespace wiiviz {
 
 		int width() const;
 		int height() const;
-		int framebufferWidth() const {
-			int fbWidth, fbHeight;
-			glfwGetFramebufferSize(m_handle, &fbWidth, &fbHeight);
-			return fbWidth;
+
+		glm::ivec2 framebufferSize() const {
+			glm::ivec2 ret;
+			glfwGetFramebufferSize(m_handle, &ret.x, &ret.y);
+			return ret;
 		}
-		int framebufferHeight() const {
-			int fbWidth, fbHeight;
-			glfwGetFramebufferSize(m_handle, &fbWidth, &fbHeight);
-			return fbHeight;
+		bool isKeyDown(int key) const {
+			return glfwGetKey(m_handle, key) == GLFW_PRESS;
 		}
 
-		bool isKeyJustPressed(int key) const {
-			return glfwGetKey(m_handle, key) == GLFW_PRESS;
+		bool isModifierDown(int mod) const {
+			return (m_modifiersDown & (1 << mod));
 		}
 
 		glm::dvec2 getCursorPos() {
@@ -59,18 +61,27 @@ namespace wiiviz {
 
 		GLFWwindow* nativeHandle() { return m_handle; }
 
+		bool popEvent(InputEvent *ret);
+
 	private:
 		GLFWwindow* m_handle = nullptr;
 
 		glm::dvec2 m_cursorPos;
 		int m_modifiersDown;
 
-		void keyCallback(int key, int scancode, int action, int mods);
+		// void framebufferSizeCallback(int width, int height) {
+		// 	// m_framebufferSize = glm::ivec2(width, height);
+		// }
 		void cursorCallback(double xpos, double ypos) {
 			m_cursorPos.x = xpos;
 			m_cursorPos.y = ypos;
 		}
-		void scrollCallback(double xoffset, double yoffset) { /* TODO: push command to queue */ }
 
+		std::queue<InputEvent> eventQueue;
+		void pushEvent(InputEvent event) { eventQueue.push(event); }
+
+		void keyCallback(int key, int scancode, int action, int mods);
+		void mouseButtonCallback(int button, int action, int mods);
+		void scrollCallback(double xoffset, double yoffset);
 	};
 } // namespace wiiviz

@@ -1,8 +1,11 @@
 #include "Application.hpp"
 #include "AppState.hpp"
+#include <Core/Input/InputEvent.hpp>
 
+#include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/ext/vector_int2.hpp>
 
 using namespace wiiviz;
 
@@ -41,10 +44,6 @@ bool Application::init() {
 
 	m_imgui.init(&m_window);
 	m_renderer.init();
-	m_renderer.resize(scrWidth, scrHeight);
-
-	// set glfw user pointer for callback use
-	// glfwSetWindowUserPointer(m_window.nativeHandle(), this);
 
 	m_wiimoteService.start(1);
 	return 1;
@@ -53,6 +52,14 @@ bool Application::init() {
 void Application::run() {
 	while (!m_window.shouldClose()) {
 		m_window.pollEvents();
+
+		InputEvent ev;
+		while (m_window.popEvent(&ev)) {
+			printf("glfw event (%d)\n", ev.type);
+		}
+
+		glm::ivec2 size = m_window.framebufferSize();
+		m_renderer.resize(size.x, size.y);
 
 		m_imgui.beginFrame();
 
