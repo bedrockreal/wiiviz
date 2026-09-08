@@ -10,6 +10,7 @@
 #include <cassert>
 #include <glad/glad.h>
 
+#include "App/Application.hpp"
 #include "Core/Input/Mouse.hpp"
 #include "Core/Window.hpp"
 #include "Render/Camera.hpp"
@@ -34,25 +35,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// #define MAKE_STRING(x)	#x
-// #define GL_SET_SHADER_UNIFORM(progID, varName, varType)	\
-	// puts(MAKE_STRING(glUniform##varType(			\
-	// 		glGetUniformLocation(progID, #varName),	\
-	// 		1,										\
-	// 		GL_FALSE,								\
-	// 		glm::value_ptr(varName))));				\
-	//
-
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
-#endif
-
-// This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
-#ifdef __EMSCRIPTEN__
-#include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
 static void glfw_error_callback(int error, const char* description)
@@ -82,6 +69,13 @@ static void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
 int main(int, char**)
 {
     glfwSetErrorCallback(glfw_error_callback);
+
+	wiiviz::Application app;
+	if (!app.init()) return 1;
+	app.run();
+	app.quit();
+	return 0;
+
     if (!glfwInit())
         return 1;
 
@@ -107,47 +101,6 @@ int main(int, char**)
 	// setup renderer
 	renderer.init();
 
-    // build and compile our shader program
-    // ------------------------------------
-	wiiviz::Shader shader;
-	shader.loadFromFile("../assets/shaders/main.vs", "../assets/shaders/main.fs");
-
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-	float axisVertices[] = {
-		// Positions          // Colors (RGB)
-		 0.0f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f, // X-axis start
-		10.0f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f, // X-axis end (Red)
-
-		 0.0f,  0.0f,  0.0f,   0.0f, 1.0f, 0.0f, // Y-axis start
-		 0.0f, 10.0f,  0.0f,   0.0f, 1.0f, 0.0f, // Y-axis end (Green)
-
-		 0.0f,  0.0f,  0.0f,   0.0f, 0.0f, 1.0f, // Z-axis start
-		 0.0f,  0.0f, 10.0f,   0.0f, 0.0f, 1.0f  // Z-axis end (Blue)
-	};
-
-
-    unsigned int VBO, VAO;
-	// unsigned int EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices, GL_STATIC_DRAW);
-
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-	// colour attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -200,14 +153,7 @@ int main(int, char**)
 	wiimoteThread.start(1);
 
     // Main loop
-#ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
-#else
     while (!window.shouldClose())
-#endif
     {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -289,27 +235,6 @@ int main(int, char**)
 
 		renderer.beginFrame();
 		renderer.renderScene(&scene);
-
-		// activate shader and bind uniforms
-
-		float aspectRatio = (float)window.framebufferWidth() / (float)window.framebufferHeight();
-
-		shader.bind();
-		shader.setMat4("model", glm::mat4(1.0f));
-		shader.setMat4("view", scene.camera.getViewMatrix());
-		shader.setMat4("projection", scene.camera.getProjectionMatrix(aspectRatio));
-
-		/* working example
-		 * const float radius = 10.0f;
-		 * float camX = sin(glfwGetTime()) * radius;
-		 * float camZ = cos(glfwGetTime()) * radius;
-		 * glm::mat4 view;
-		 * view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-		*/
-
-		// draw our triangle
-		glBindVertexArray(VAO);
-        glDrawArrays(GL_LINES, 0, 6);
 
 		// Render ImGui Overlays
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

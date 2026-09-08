@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -12,6 +13,10 @@ namespace wiiviz {
 	public:
 		bool create(int width, int height, const char* title) {
 			m_handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
+
+			// set glfw user pointer for callback use
+			glfwSetWindowUserPointer(m_handle, this);
+
 			return m_handle != nullptr;
 		}
 
@@ -28,9 +33,7 @@ namespace wiiviz {
 			glfwSwapInterval(enabled);
 		}
 
-		// void bindCallbacks() {
-		// 	glfwSetKeyCallback(m_handle, &Window::keyCallback);
-		// }
+		void bindCallbacks();
 
 		int width() const;
 		int height() const;
@@ -60,8 +63,14 @@ namespace wiiviz {
 		GLFWwindow* m_handle = nullptr;
 
 		glm::dvec2 m_cursorPos;
-		int m_modifiers;
+		int m_modifiersDown;
 
-		void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) { m_modifiers = mods; }
+		void keyCallback(int key, int scancode, int action, int mods);
+		void cursorCallback(double xpos, double ypos) {
+			m_cursorPos.x = xpos;
+			m_cursorPos.y = ypos;
+		}
+		void scrollCallback(double xoffset, double yoffset) { /* TODO: push command to queue */ }
+
 	};
 } // namespace wiiviz

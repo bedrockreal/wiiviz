@@ -13,7 +13,7 @@ Camera::Camera() {
 }
 
 void Camera::reset() {
-	m_position = glm::vec3(10, 0, 10);
+	m_position = glm::vec3(1, 1, 1);
 	direction = glm::normalize(-m_position); // set target := (0, 0, 0)
 	targetDistance = glm::length(m_position);
 
