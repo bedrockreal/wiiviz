@@ -43,9 +43,14 @@ int WiiuseContext::connect() {
     }
     m_connectedCount = wiiuse_connect(m_wiimotes, m_capacity);
 
-	// temp: for every connected wiimote, activate accelerometer
+	// temp: for every connected wiimote, activate accelerometer and gyro
 	for (int i = 0; i < m_capacity; ++i) if (WIIMOTE_IS_CONNECTED(m_wiimotes[i])) {
 		wiiuse_motion_sensing(m_wiimotes[i], 1);
+		if (WIIUSE_USING_EXP(m_wiimotes[i])) {
+			wiiuse_set_motion_plus(m_wiimotes[i], 2);
+		} else {
+			wiiuse_set_motion_plus(m_wiimotes[i], 1);
+		}
 	}
     return m_connectedCount;
 }

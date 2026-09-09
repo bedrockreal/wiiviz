@@ -11,7 +11,7 @@
 #include <glad/glad.h>
 
 #include "App/Application.hpp"
-#include "Core/Input/Mouse.hpp"
+// #include "Core/Input/Mouse.hpp"
 #include "Core/Window.hpp"
 #include "Render/Camera.hpp"
 #include "Render/Renderer.hpp"
@@ -96,7 +96,6 @@ int main(int, char**)
 
 	// setup callbacks
 	glfwSetFramebufferSizeCallback(window.nativeHandle(), &framebufferSizeCallback);
-	wiiviz::Mouse::bindCallbacks(window.nativeHandle());
 
 	// setup renderer
 	renderer.init();

@@ -10,15 +10,16 @@ namespace wiiviz::Wiimote {
 		assert(this->isConnected());
 		assert(WIIUSE_USING_ACC(m_native));
 
+		retSample->hasMotionPlus = (m_native->exp.type == EXP_MOTION_PLUS || m_native->exp.type == EXP_MOTION_PLUS_NUNCHUK);
+		retSample->hasNunchuk = (m_native->exp.type == EXP_NUNCHUK || m_native->exp.type == EXP_MOTION_PLUS_NUNCHUK);
+
 		if (m_native->event == WIIUSE_EVENT) {
 			retSample->inited = 1;
-			retSample->gforce = m_native->gforce;
-			if (m_native->exp.type == EXP_MOTION_PLUS || m_native->exp.type == EXP_MOTION_PLUS_NUNCHUK) {
-				retSample->hasMotionPlus = 1;
-				if (m_native->exp.type == EXP_MOTION_PLUS_NUNCHUK) {
-					retSample->hasNunchuk = 1;
-				}
-				retSample->gyro = m_native->exp.mp.angle_rate_gyro;
+			memcpy(&retSample->gforce, &m_native->gforce, sizeof(gforce_t));
+			// assert(m_native->exp.type == EXP_MOTION_PLUS);
+
+			if (retSample->hasMotionPlus) {
+				memcpy(&retSample->gyro, &m_native->exp.mp.angle_rate_gyro, sizeof(ang3f_t));
 			}
 			return 1;
 		}

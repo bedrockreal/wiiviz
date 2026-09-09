@@ -3,7 +3,7 @@
 #include <Common/ThreadSafeQueue.hpp>
 
 #include <ctime>
-#include <wiiuse.h>
+#include <glm/vec3.hpp>
 
 namespace wiiviz::Wiimote {
 	struct RawMotionSample {
@@ -14,8 +14,8 @@ namespace wiiviz::Wiimote {
 		bool hasMotionPlus = false;
 		bool hasNunchuk = false;
 		bool inited = false;
-		gforce_t gforce;
-		ang3f_t gyro;
+		glm::vec3 gforce;
+		glm::vec3 gyro;
 	};
 
 	typedef wiiviz::ThreadSafeQueue<RawMotionSample> MotionSampleQueue;

@@ -85,6 +85,25 @@ void Application::quit() {
 void Application::update() {
 	updateInputState();
 	m_cameraController.updateCamera(&m_inputState, &m_sceneView.camera);
+
+	// test wiimote (working)
+	// char text[256];
+	auto wiimoteSnapshot = m_wiimoteService.getLatestSnapshot();
+	if (wiimoteSnapshot.connectedCount == 0) {
+		// sprintf(text, "No wiimotes Connected");
+	} else {
+		assert(wiimoteSnapshot.latestSamples.size() == 1);
+		auto wiimoteSample = wiimoteSnapshot.latestSamples[0];
+		if (!wiimoteSnapshot.inited) {
+			// sprintf(text, "no data");
+		} else {
+			printf("accel (%.2f, %.2f, %.2f)\n", wiimoteSample.gforce.x, wiimoteSample.gforce.y, wiimoteSample.gforce.z);
+			if (wiimoteSample.hasMotionPlus) {
+				printf("gyro (%.2f, %.2f, %.2f)\n", wiimoteSample.gyro.x, wiimoteSample.gyro.y, wiimoteSample.gyro.z);
+			}
+		}
+	}
+	// puts(text);
 }
 
 void Application::updateInputState() {
