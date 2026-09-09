@@ -8,8 +8,6 @@
 
 using namespace wiiviz;
 
-extern Camera camera;
-
 void Renderer::beginFrame() {
 	clear();
 }
@@ -22,6 +20,9 @@ void Renderer::renderScene(const SceneView *scene) {
 	ctx.cameraPosition = scene->camera.getPosition();
 
 	m_gridRenderer.render(&ctx);
+	for (int i = 0; i < scene->devices.size(); ++i) {
+		m_wiimoteRenderer.render(&ctx, &scene->devices[i]);
+	}
 }
 
 void Renderer::resize(int framebufferWidth, int framebufferHeight) {

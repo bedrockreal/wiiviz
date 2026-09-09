@@ -46,7 +46,11 @@ bool Application::init() {
 	m_imgui.init(&m_window);
 	m_renderer.init();
 
+	// TODO: set real capacity; 1 is placeholder only
 	m_wiimoteService.start(1);
+	m_sceneView.devices.resize(1);
+	m_sceneView.devices[0].position = glm::vec3(0.5f, 0.5f, 0.f);
+	m_sceneView.devices[0].color = glm::vec4(0.f, 1.f, 0.f, 0.f);
 	return 1;
 }
 
@@ -101,6 +105,9 @@ void Application::update() {
 			if (wiimoteSample.hasMotionPlus) {
 				printf("gyro (%.2f, %.2f, %.2f)\n", wiimoteSample.gyro.x, wiimoteSample.gyro.y, wiimoteSample.gyro.z);
 			}
+
+			// placeholder
+			m_sceneView.devices[0].position = wiimoteSample.gforce;
 		}
 	}
 	// puts(text);
