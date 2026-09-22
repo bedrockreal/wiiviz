@@ -16,8 +16,8 @@ Camera::Camera() {
 
 void Camera::reset() {
 	m_position = glm::vec3(1, 1, 1);
-	direction = glm::normalize(-m_position); // set target := (0, 0, 0)
-	targetDistance = glm::length(m_position);
+	m_direction = glm::normalize(-m_position); // set target := (0, 0, 0)
+	m_targetDistance = glm::length(m_position);
 
 	fov = glm::radians(45.f);
 	nearPlane = 0.01f;
@@ -26,7 +26,7 @@ void Camera::reset() {
 
 void Camera::pan(const glm::vec2 offset) {
 	// printf("pan dx=%.3f dy=%.3f\n", mouse_dx, mouse_dy);
-	glm::vec3 right = glm::normalize(glm::cross(up, direction));
+	glm::vec3 right = glm::normalize(glm::cross(up, m_direction));
 	m_position += (right * offset.x + up * offset.y);
 	// printPos();
 }
@@ -34,9 +34,9 @@ void Camera::pan(const glm::vec2 offset) {
 void Camera::orbit(const glm::vec2 offset) {
 	// printf("orbit dx=%.3f dy=%.3f\n", mouse_dx, mouse_dy);
 	const glm::vec3 target = getTarget();
-	glm::vec3 directionNeg = glm::normalize(-direction);
-	float pitch = std::asinf((directionNeg.z));
-	float yaw = std::atan2(directionNeg.y, directionNeg.x);
+	glm::vec3 m_directionNeg = glm::normalize(-m_direction);
+	float pitch = std::asinf((m_directionNeg.z));
+	float yaw = std::atan2(m_directionNeg.y, m_directionNeg.x);
 
 	yaw -= offset.x;
 	// yaw -= offset.x * orbitSpeed;
@@ -45,11 +45,17 @@ void Camera::orbit(const glm::vec2 offset) {
 
 	// printf("yaw=%.3f pitch=%.3f\n", yaw, pitch);
 
-	directionNeg.x = std::cosf(pitch) * std::cosf(yaw);
-	directionNeg.y = std::cosf(pitch) * std::sinf(yaw);
-	directionNeg.z = std::sinf(pitch);
+	m_directionNeg.x = std::cosf(pitch) * std::cosf(yaw);
+	m_directionNeg.y = std::cosf(pitch) * std::sinf(yaw);
+	m_directionNeg.z = std::sinf(pitch);
 
-	direction = glm::normalize(-directionNeg);
-	m_position = target - direction * targetDistance;
+	m_direction = glm::normalize(-m_directionNeg);
+	m_position = target - m_direction * m_targetDistance;
 	// printPos();
+}
+
+void Camera::zoom(const float offset) {
+	const float multiplier = std::exp(-offset);
+	m_position += m_direction * m_targetDistance * (1 - multiplier);
+	m_targetDistance *= multiplier;
 }

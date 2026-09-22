@@ -146,21 +146,22 @@ void Application::updateInputState() {
 				break;
 		}
 	}
-		// printf("shift = %d\n", m_inputState.shift);
-		// printf("ctrl = %d\n", m_inputState.ctrl);
-		// printf("alt = %d\n", m_inputState.alt);
-		// printf("leftMouse = %d\n", m_inputState.leftMouse);
-		// printf("rightMouse = %d\n", m_inputState.rightMouse);
-		// printf("middleMouse = %d\n", m_inputState.middleMouse);
-	
-		m_inputState.scrollDelta = newScrollDelta;
-		m_inputState.shift = m_window.isModifierDown(GLFW_MOD_SHIFT);
-		m_inputState.ctrl = m_window.isModifierDown(GLFW_MOD_CONTROL);
-		m_inputState.alt = m_window.isModifierDown(GLFW_MOD_ALT);
+	// printf("shift = %d\n", m_inputState.shift);
+	// printf("ctrl = %d\n", m_inputState.ctrl);
+	// printf("alt = %d\n", m_inputState.alt);
+	// printf("leftMouse = %d\n", m_inputState.leftMouse);
+	// printf("rightMouse = %d\n", m_inputState.rightMouse);
+	// printf("middleMouse = %d\n", m_inputState.middleMouse);
+	// printf("scrollDelta = (%f, %f)\n", newScrollDelta.x, newScrollDelta.y);
 
-		glm::vec2 newMousePos = m_window.getCursorPos();
-		m_inputState.mouseDelta = newMousePos - m_inputState.mousePos;
-		m_inputState.mousePos = newMousePos;
+	m_inputState.scrollDelta = newScrollDelta;
+	m_inputState.shift = m_window.isModifierDown(GLFW_MOD_SHIFT);
+	m_inputState.ctrl = m_window.isModifierDown(GLFW_MOD_CONTROL);
+	m_inputState.alt = m_window.isModifierDown(GLFW_MOD_ALT);
+
+	glm::vec2 newMousePos = m_window.getCursorPos();
+	m_inputState.mouseDelta = newMousePos - m_inputState.mousePos;
+	m_inputState.mousePos = newMousePos;
 }
 
 void Application::buildSceneView(const AppState *appState) {

@@ -13,13 +13,10 @@ namespace wiiviz {
 		Camera();
 		void pan(const glm::vec2 offset);
 		void orbit(const glm::vec2 offset);
+		void zoom(const float offset);
 
-		// make zoom, getTarget and getView inline
-		void zoom(const float offset) {
-			// m_position += direction * offset * zoomSpeed;
-		}
 		const glm::vec3 getTarget() const {
-			return m_position + direction * targetDistance;
+			return m_position + m_direction * m_targetDistance;
 		}
 		const glm::mat4 getViewMatrix() const {
 			return glm::lookAt(m_position, getTarget(), up);
@@ -32,7 +29,7 @@ namespace wiiviz {
 
 	private:
 		constexpr static glm::vec3 up = glm::vec3(0.f, 0.f, 1.f);
-		float targetDistance;
+		float m_targetDistance;
 
 		// constexpr static float panSpeed = 0.01;
 		// constexpr static float orbitSpeed = 0.01;
@@ -49,7 +46,7 @@ namespace wiiviz {
 		float farPlane;
 
 		glm::vec3 m_position;
-		glm::vec3 direction;
+		glm::vec3 m_direction;
 
 		void printPos() {
 			printf("%.3f %.3f %.3f\n", m_position.x, m_position.y, m_position.z);

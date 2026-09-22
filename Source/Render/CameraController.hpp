@@ -9,20 +9,23 @@ namespace wiiviz {
 		void updateCamera(const InputState *inputState, Camera *camera) {
 			if (inputState->middleMouse) {
 				if (inputState->shift) {
-					camera->pan(inputState->mouseDelta * panSensitivity);
+					camera->pan(inputState->mouseDelta * m_panSensitivity);
 				} else {
-					camera->orbit(inputState->mouseDelta * orbitSensitivity);
+					camera->orbit(inputState->mouseDelta * m_orbitSensitivity);
 				}
+			}
+			if (inputState->scrollDelta.y) {
+				camera->zoom(inputState->scrollDelta.y * m_zoomSensitivity);
 			}
 		}
 
-		void setPanSensitivity(float value) { panSensitivity = value; }
-		void setOrbitSensitivity(float value) { orbitSensitivity = value; }
-		void setZoomSensitivity(float value) { zoomSensitivity = value; }
+		void setPanSensitivity(float value) { m_panSensitivity = value; }
+		void setOrbitSensitivity(float value) { m_orbitSensitivity = value; }
+		void setZoomSensitivity(float value) { m_zoomSensitivity = value; }
 		
 	private:
-		float panSensitivity = 0.01;
-		float orbitSensitivity = 0.01;
-		float zoomSensitivity = 0.1;
+		float m_panSensitivity = 0.01;
+		float m_orbitSensitivity = 0.01;
+		float m_zoomSensitivity = 0.1;
 	};
 } // namespace wiiviz
